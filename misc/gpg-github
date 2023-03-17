@@ -30,18 +30,3 @@ read -s -p "Enter your GitHub password or personal access token: " GITHUB_TOKEN
 curl -u $GITHUB_USERNAME:$GITHUB_TOKEN -X POST https://api.github.com/user/gpg_keys --data "{\"title\":\"$(hostname)\",\"key\":\"$(cat pubkey.txt)\"}"
 
 echo "Done!"
-#!/bin/bash
-
-echo "Generating a new GPG key..."
-gpg --full-generate-key
-
-echo "Exporting the public key..."
-KEYID=$(gpg --list-secret-keys --keyid-format LONG | grep "^sec" | awk '{print $2}' | cut -d'/' -f2)
-gpg --armor --export $KEYID > pubkey.txt
-
-echo "Adding the public key to GitHub..."
-read -p "Enter your GitHub username: " GITHUB_USERNAME
-read -s -p "Enter your GitHub password or personal access token: " GITHUB_TOKEN
-curl -u $GITHUB_USERNAME:$GITHUB_TOKEN -X POST https://api.github.com/user/gpg_keys --data "{\"title\":\"$(hostname)\",\"key\":\"$(cat pubkey.txt)\"}"
-
-echo "Done!"
