@@ -17,6 +17,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Prompt the user for their postimg.cc API key
+read -p "Enter your postimg.cc API key: " API_KEY
+
 # Prompt the user for the path to the image file
 read -p "Enter the path to your image file: " IMAGE_PATH
 
@@ -27,11 +30,7 @@ if [ ! -f "$IMAGE_PATH" ]; then
         fi
 
         # Make the API call to upload the image
-        RESPONSE=$(curl -s -H "Authorization: YOUR_API_KEY" -H "Content-Type: multipart/form-data" -F "file=@$IMAGE_PATH" https://postimg.cc/upload.php)
+        RESPONSE=$(curl -s -H "Authorization: $API_KEY" -H "Content-Type: multipart/form-data" -F "file=@$IMAGE_PATH" https://postimg.cc/upload.php)
 
         # Parse the response to get the image URL
-        IMAGE_URL=$(echo "$RESPONSE" | grep -o "https://i.postimg.cc/[^\"]*")
-
-        # Print the image URL
-        echo "Image uploaded successfully!"
-        echo "Image URL: $IMAGE_URL"
+        IMAGE_URL=$(echo "$RESPONSE" | grep -o "https://i.post
