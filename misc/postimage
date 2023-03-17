@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2199
+# shellcheck disable=SC2086
+# shellcheck source=/dev/null
+#
+# Copyright (C) 2023-02 xealea <xealea@proton.me>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Prompt the user for the path to the image file
+read -p "Enter the path to your image file: " IMAGE_PATH
+
+# Make sure the file exists
+if [ ! -f "$IMAGE_PATH" ]; then
+    echo "Error: File not found."
+        exit 1
+        fi
+
+        # Make the API call to upload the image
+        RESPONSE=$(curl -s -H "Authorization: YOUR_API_KEY" -H "Content-Type: multipart/form-data" -F "file=@$IMAGE_PATH" https://postimg.cc/upload.php)
+
+        # Parse the response to get the image URL
+        IMAGE_URL=$(echo "$RESPONSE" | grep -o "https://i.postimg.cc/[^\"]*")
+
+        # Print the image URL
+        echo "Image uploaded successfully!"
+        echo "Image URL: $IMAGE_URL"
