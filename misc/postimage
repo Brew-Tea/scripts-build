@@ -26,11 +26,15 @@ read -p "Enter the path to your image file: " IMAGE_PATH
 # Make sure the file exists
 if [ ! -f "$IMAGE_PATH" ]; then
     echo "Error: File not found."
-        exit 1
-        fi
+    exit 1
+fi
 
-        # Make the API call to upload the image
-        RESPONSE=$(curl -s -H "Authorization: $API_KEY" -H "Content-Type: multipart/form-data" -F "file=@$IMAGE_PATH" https://postimg.cc/upload.php)
+# Make the API call to upload the image
+RESPONSE=$(curl -s -H "Authorization: $API_KEY" -H "Content-Type: multipart/form-data" -F "file=@$IMAGE_PATH" https://postimg.cc/upload.php)
 
-        # Parse the response to get the image URL
-        IMAGE_URL=$(echo "$RESPONSE" | grep -o "https://i.post
+# Parse the response to get the image URL
+IMAGE_URL=$(echo "$RESPONSE" | grep -o "https://i.postimg.cc/[^\"]*")
+
+# Print the image URL
+echo "Image uploaded successfully!"
+echo "Image URL: $IMAGE_URL"
