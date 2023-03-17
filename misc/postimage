@@ -20,8 +20,27 @@
 # Prompt the user for their postimg.cc API key
 read -p "Enter your postimg.cc API key: " API_KEY
 
-# Prompt the user for the path to the image file
-read -p "Enter the path to your image file: " IMAGE_PATH
+# Prompt the user for the path or URL of the image file
+read -p "Enter the path or URL of the image file: " IMAGE
+
+# Check if the input is a URL or a local file
+if [[ "$IMAGE" == "http"* ]]; then
+    # Download the image to a temporary file
+    TEMP_FILE=$(mktemp)
+    curl -s -o "$TEMP_FILE" "$IMAGE"
+
+    # Make sure the file was downloaded successfully
+    if [ ! -s "$TEMP_FILE" ]; then
+        echo "Error: Failed to download file from URL."
+        exit 1
+    fi
+
+    # Use the temporary file for uploading
+    IMAGE_PATH="$TEMP_FILE"
+else
+    # Use the local file directly for uploading
+    IMAGE_PATH="$IMAGE"
+fi
 
 # Make sure the file exists
 if [ ! -f "$IMAGE_PATH" ]; then
@@ -38,3 +57,8 @@ IMAGE_URL=$(echo "$RESPONSE" | grep -o "https://i.postimg.cc/[^\"]*")
 # Print the image URL
 echo "Image uploaded successfully!"
 echo "Image URL: $IMAGE_URL"
+
+# Clean up the temporary file (if used)
+if [[ "$IMAGE" == "http"* ]]; then
+    rm "$TEMP_FILE"
+fi
