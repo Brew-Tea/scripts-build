@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2199
+# shellcheck disable=SC2086
+# shellcheck source=/dev/null
+#
+# Copyright (C) 2023-02 xealea <xealea@proton.me>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cd ../.. || exit
+
+# Unhandle Error
+set -eo;
+
+# Function to show an informational message
+msg() {
+    echo -e "\e[1;32m$*\e[0m"
+}
+
+# env
+TAG="LA.UM.9.12.r1-15200-SMxx50.QSSI13.0"
+TECHPACK="$TAG"
+
+if [[ "$@" =~ "add-remote"* ]]; then
+  remotes=(
+    qcacld:https://git.codelinaro.org/clo/la/platform/vendor/qcom-opensource/wlan/qcacld-3.0
+    fw-api:https://git.codelinaro.org/clo/la/platform/vendor/qcom-opensource/wlan/fw-api
+    qca-wifi-host-cmn:https://git.codelinaro.org/clo/la/platform/vendor/qcom-opensource/wlan/qca-wifi-host-cmn
+    techpack-audio:https://git.codelinaro.org/clo/la/platform/vendor/opensource/audio-kernel
+    techpack-data:https://git.codelinaro.org/clo/la/platform/vendor/qcom-opensource/data-kernel
+    techpack-video:https://git.codelinaro.org/clo/la/platform/vendor/opensource/video-driver
+    techpack-camera:https://git.codelinaro.org/clo/la/platform/vendor/opensource/camera-kernel
+    techpack-display:https://git.codelinaro.org/clo/la/platform/vendor/opensource/display-drivers
+  )
+  
+  for remote in "${remotes[@]}"; do
+    git remote add "${remote%%:*}" "${remote#*:}"
+  done
+
+elif [[ "$@" =~ "delete-remote"* ]]; then
+  remotes=(
+    qcacld fw-api qca-wifi-host-cmn techpack-audio techpack-data techpack-video techpack-camera techpack-display
+  )
+  
+  for remote in "${remotes[@]}"; do
+    git remote remove "$remote"
+  done
+
+elif [[ "$@" =~ "merge-all"* ]]; then
+  remotes=(
+    qcacld:drivers/staging/qcacld-3.0
+    fw-api:drivers/staging/fw-api
+    qca-wifi-host-cmn:drivers/staging/qca-wifi-host-cmn
+    techpack-audio:techpack/audio
+    techpack-data:techpack/data
+    techpack-video:techpack/video
+    techpack-camera:techpack/camera
+    techpack-display:techpack/display
+  )
+  
+  for remote in "${remotes[@]}"; do
+    remote_name="${remote%%:*}"
+    remote_path="${remote#*:}"
+    msg "Starting To Execute Command 'Merged $remote_name'"
+    git fetch "$remote_name" "$TAG"
+    git merge -s ours --no-commit FETCH_HEAD --allow-unrelated-histories
+    git read-tree --prefix="$remote_path" -u FETCH_HEAD
+    git commit -m "INITIAL MERGED $remote_name into $TECHPACK" --signoff
+  done
+fi
+
+if [[ "$@" =~ "wireguard"* ]]; then
+then
+      msg "Starting To Execute Command 'Import Wireguard'"
+      git remote add Guard https://git.zx2c4.com/wireguard-linux
+      git fetch Guard $WIREGUARD
+      git merge --no-commit FETCH_HEAD
+      git commit -m "Importing Wireguard into kernel" --signoff
+
+      msg "Import Has Been Completely"
+fi
+
+if [[ "$@" =~ "update-all" ]]; then
+    echo "Starting to update drivers..."
+    for driver in qcacld fw-api qca-wifi-host-cmn; do
+        git fetch $driver $TAG
+        git merge -X subtree=drivers/staging/$driver-3.0 --no-commit FETCH_HEAD
+        git commit -m "MERGED UPDATE: $driver into $TAG" --signoff
+    done
+
+    echo "Starting to update techpack..."
+    for tech in techpack-audio techpack-data techpack-video techpack-camera techpack-display; do
+        git fetch $tech $TECHPACK
+        git merge -X subtree=techpack/$tech --no-commit FETCH_HEAD
+        git commit -m "MERGED UPDATE: $tech into $TECHPACK" --signoff
+    done
+
+    echo "Update Completed"
+fi
