@@ -16,4 +16,4 @@ fi
 OUTPUT=$(basename "$URL")
 
 # Download the file with aria2c
-aria2c -x "$THREADS" -o "$OUTPUT" "$URL"
+aria2c -c -x "$THREADS" -o "$OUTPUT" "$URL"
