@@ -17,8 +17,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#!/bin/bash
+
 # Prompt the user for their postimg.cc API key
-read -p "Enter your postimg.cc API key: " API_KEY
+read -p "Enter your postimg.cc API key from https://postimages.org/login/api: " API_KEY
 
 # Prompt the user for the path or URL of the image file
 read -p "Enter the path or URL of the image file: " IMAGE
@@ -49,16 +51,21 @@ if [ ! -f "$IMAGE_PATH" ]; then
 fi
 
 # Make the API call to upload the image
-RESPONSE=$(curl -s -H "Authorization: $API_KEY" -H "Content-Type: multipart/form-data" -F "file=@$IMAGE_PATH" https://postimg.cc/upload.php)
+RESPONSE=$(curl -s -H "Authorization: Bearer $API_KEY" -H "Content-Type: multipart/form-data" -F "image=@$IMAGE_PATH" https://postimages.org/api/upload)
 
 # Parse the response to get the image URL
 IMAGE_URL=$(echo "$RESPONSE" | grep -o "https://i.postimg.cc/[^\"]*")
 
 # Print the image URL
-echo "Image uploaded successfully!"
-echo "Image URL: $IMAGE_URL"
+if [ -z "$IMAGE_URL" ]; then
+    echo "Error: Failed to upload image."
+else
+    echo "Image uploaded successfully!"
+    echo "Image URL: $IMAGE_URL"
+fi
 
 # Clean up the temporary file (if used)
 if [[ "$IMAGE" == "http"* ]]; then
     rm "$TEMP_FILE"
 fi
+
