@@ -129,15 +129,12 @@ tg_post_msg() {
 }
 
 tg_post_build() {
-	#Post MD5Checksum alongwith for easeness
-	MD5CHECK=$(md5sum "$1" | cut -d' ' -f1)
-
-	#Show the Checksum alongwith caption
+	# Show the caption without MD5 checksum
 	curl --progress-bar -F document=@"$1" "$BOT_BUILD_URL" \
-	-F chat_id="$CHATID"  \
+	-F chat_id="$CHATID" \
 	-F "disable_web_page_preview=true" \
 	-F "parse_mode=Markdown" \
-	-F caption="$2 | *MD5 Checksum : *\`$MD5CHECK\`"
+	-F caption="$2"
 }
 
 build_kernel() {
