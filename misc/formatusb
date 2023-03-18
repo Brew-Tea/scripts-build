@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Get the device name of the USB drive
+read -p "Please insert the USB drive and press Enter to continue..."
+USB_DEVICE=$(dmesg | tail -n 20 | grep 'Attached SCSI removable disk' | awk '{print $NF}' | sed 's/\]//')
+
+# Prompt the user to confirm the device name
+read -p "The device $USB_DEVICE will be formatted. Are you sure? (y/n) " CHOICE
+
+if [ "$CHOICE" != "y" ]; then
+  echo "Operation cancelled."
+  exit 1
+fi
+
+# Unmount any mounted partitions on the USB drive
+sudo umount $USB_DEVICE*
+
+# Format the USB drive
+sudo mkfs.vfat -F 32 -n "USB" $USB_DEVICE
+
+echo "The USB drive has been formatted successfully."

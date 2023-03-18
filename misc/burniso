@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Get the device name of the USB drive
+read -p "Please insert the USB drive and press Enter to continue..."
+USB_DEVICE=$(dmesg | tail -n 20 | grep 'Attached SCSI removable disk' | awk '{print $NF}' | sed 's/\]//')
+
+# Prompt the user to select the ISO image file
+read -e -p "Please enter the path to the ISO file: " ISO_FILE
+
+# Check if the ISO file exists
+if [ ! -f $ISO_FILE ]; then
+  echo "ERROR: The specified ISO file does not exist."
+  exit 1
+fi
+
+# Unmount the USB drive if it is mounted
+sudo umount $USB_DEVICE*
+
+# Write the ISO image to the USB drive using dd
+sudo dd if=$ISO_FILE of=$USB_DEVICE bs=4M status=progress oflag=sync
+
+# Sync the file system and eject the USB drive
+sync
+sudo eject $USB_DEVICE
+
+echo "Done!"
