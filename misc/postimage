@@ -51,7 +51,7 @@ if [ ! -f "$IMAGE_PATH" ]; then
 fi
 
 # Make the API call to upload the image
-RESPONSE=$(curl -s -H "Authorization: Bearer $API_KEY" -H "Content-Type: multipart/form-data" -F "image=@$IMAGE_PATH" https://postimages.org/api/upload)
+RESPONSE=$(curl -s -H "$API_KEY" -H "Content-Type: multipart/form-data" -F "image=@$IMAGE_PATH" https://postimages.org/api/upload)
 
 # Parse the response to get the image URL
 IMAGE_URL=$(echo "$RESPONSE" | grep -o "https://i.postimg.cc/[^\"]*")
