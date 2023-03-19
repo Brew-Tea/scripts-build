@@ -1,26 +1,41 @@
 #!/bin/bash
 
-# Get the device name of the USB drive
-read -p "Please insert the USB drive and press Enter to continue..."
-USB_DEVICE=$(dmesg | tail -n 20 | grep 'Attached SCSI removable disk' | awk '{print $NF}' | sed 's/\]//')
-
-# Prompt the user to select the ISO image file
-read -e -p "Please enter the path to the ISO file: " ISO_FILE
-
-# Check if the ISO file exists
-if [ ! -f $ISO_FILE ]; then
-  echo "ERROR: The specified ISO file does not exist."
-  exit 1
+# Step 1: Detect the USB drive
+usb_dev=$(lsblk -o NAME,SIZE,TYPE,RM,MOUNTPOINT | grep -e '^[a-z]' | grep -v 'part\|rom' | awk '{if($4=="1"){print $1}}')
+if [ -z "$usb_dev" ]; then
+    echo "No USB drive detected."
+    exit 1
 fi
 
-# Unmount the USB drive if it is mounted
-sudo umount $USB_DEVICE*
+# Step 2: Unmount the USB drive if it's mounted
+if grep -qs "$usb_dev" /proc/mounts; then
+    echo "Unmounting $usb_dev ..."
+    sudo umount /dev/$usb_dev
+fi
 
-# Write the ISO image to the USB drive using dd
-sudo dd if=$ISO_FILE of=$USB_DEVICE bs=4M status=progress oflag=sync
+# Step 3: Prompt user for the path to the ISO file
+read -p "Enter the path to the ISO file: " iso_path
+if [ ! -f "$iso_path" ]; then
+    echo "Error: $iso_path not found."
+    exit 1
+fi
 
-# Sync the file system and eject the USB drive
-sync
-sudo eject $USB_DEVICE
+# Step 4: Confirm with user before writing to the USB drive
+while true; do
+    read -p "WARNING: This will erase all data on $usb_dev. Are you sure you want to proceed? (y/n): " yn
+    case $yn in
+        [Yy]* ) break;;
+        [Nn]* ) echo "Operation cancelled by user."; exit;;
+        * ) echo "Please answer y or n.";;
+    esac
+done
 
+# Step 5: Write the ISO to the USB drive using dd
+echo "Writing $iso_path to $usb_dev ..."
+sudo dd if=$iso_path of=/dev/$usb_dev bs=4M status=progress oflag=sync
+
+# Step 6: Eject the USB drive
+echo "Ejecting $usb_dev ..."
+sudo eject /dev/$usb_dev
 echo "Done!"
+
