@@ -17,8 +17,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#!/bin/bash
-
 # Prompt the user for their postimg.cc API key
 read -p "Enter your postimg.cc API key from https://postimages.org/login/api: " API_KEY
 
