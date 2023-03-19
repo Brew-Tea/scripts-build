@@ -1,32 +1,56 @@
-#!/usr/bin/env bash
-# shellcheck disable=SC2199
-# shellcheck disable=SC2086
-# shellcheck source=/dev/null
-#
-# Copyright (C) 2023-02 xealea <xealea@proton.me>
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#!/bin/bash
 
-echo "Generating a new GPG key..."
-gpg --full-generate-key
+# Set the email address who want to associated with your GPG key
+read -p "Enter the email address associated with your GPG key: " email
 
-echo "Exporting the public key..."
-KEYID=$(gpg --list-secret-keys --keyid-format LONG | grep "^sec" | awk '{print $2}' | cut -d'/' -f2)
-gpg --armor --export $KEYID > pubkey.txt
+# Check if xclip is installed
+if ! command -v xclip &> /dev/null
+then
+    echo "xclip could not be found, please install xclip to copy the GPG key to clipboard"
+    exit 1
+fi
 
-echo "Adding the public key to GitHub..."
-read -p "Enter your GitHub username: " GITHUB_USERNAME
-read -s -p "Enter your GitHub password or personal access token: " GITHUB_TOKEN
-curl -u $GITHUB_USERNAME:$GITHUB_TOKEN -X POST https://api.github.com/user/gpg_keys --data "{\"title\":\"$(hostname)\",\"key\":\"$(cat pubkey.txt)\"}"
+# Set the GitHub token
+read -p "Enter your GitHub token: " token
 
-echo "Done!"
+# Generate a new GPG key
+gpg --batch --full-generate-key --pinentry-mode loopback <<EOF
+  %no-protection
+  Key-Type: RSA
+  Key-Length: 4096
+  Subkey-Type: RSA
+  Subkey-Length: 4096
+  Name-Real: YOUR_NAME
+  Name-Email: $email
+  Expire-Date: 0
+  %commit
+EOF
+
+# Get the GPG key ID
+gpg_id=$(gpg --list-secret-keys --keyid-format LONG | awk '/sec/ {if (length($2) == 16) print $2; else print substr($2, length($2)-15, 16)}')
+
+# Add the GPG key to GitHub
+response=$(curl --silent --request POST --header "Authorization: Bearer $token" --data "{\"armored_public_key\": \"$(gpg --armor --export $gpg_id)\"}" https://api.github.com/user/gpg_keys)
+
+if [[ $response =~ .*\"message\":\s*\"([^[:space:]]+)\".* ]]; then
+  echo "Error: ${BASH_REMATCH[1]}"
+  exit 1
+else
+  echo "GPG key added to GitHub account"
+fi
+
+# Sign commits automatically with the new GPG key
+git config --global user.signingkey $gpg_id
+git config --global commit.gpgsign true
+
+# Export the public key in ASCII armored format
+gpg --armor --export $gpg_id > gpg_key.asc
+
+# Display the public key in the terminal
+cat gpg_key.asc
+
+# Copy the public key to the clipboard
+xclip -sel clip < gpg_key.asc
+
+echo "GPG public key copied to clipboard"
+
