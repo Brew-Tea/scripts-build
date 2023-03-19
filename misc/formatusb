@@ -1,21 +1,30 @@
 #!/bin/bash
 
-# Get the device name of the USB drive
-read -p "Please insert the USB drive and press Enter to continue..."
-USB_DEVICE=$(dmesg | tail -n 20 | grep 'Attached SCSI removable disk' | awk '{print $NF}' | sed 's/\]//')
-
-# Prompt the user to confirm the device name
-read -p "The device $USB_DEVICE will be formatted. Are you sure? (y/n) " CHOICE
-
-if [ "$CHOICE" != "y" ]; then
-  echo "Operation cancelled."
-  exit 1
+# Step 1: Detect the USB drive
+usb_dev=$(lsblk -o NAME,SIZE,TYPE,RM,MOUNTPOINT | grep -e '^[a-z]' | grep -v 'part\|rom' | awk '{if($4=="1"){print $1}}') 
+if [ -z "$usb_dev" ]; then
+    echo "No USB drive detected."
+    exit 1
 fi
 
-# Unmount any mounted partitions on the USB drive
-sudo umount $USB_DEVICE*
+# Step 2: Unmount the USB drive if it's mounted
+if grep -qs "$usb_dev" /proc/mounts; then
+    echo "Unmounting $usb_dev ..."
+    umount /dev/$usb_dev
+fi
 
-# Format the USB drive
-sudo mkfs.vfat -F 32 -n "USB" $USB_DEVICE
+# Step 3: Confirm with user before formatting the USB drive
+while true; do
+    read -p "Do you want to format the USB drive $usb_dev? (y/n): " yn
+    case $yn in
+        [Yy]* ) break;;
+        [Nn]* ) echo "Operation cancelled by user."; exit;;
+        * ) echo "Please answer y or n.";;
+    esac
+done
 
-echo "The USB drive has been formatted successfully."
+# Step 4: Format the USB drive
+echo "Formatting $usb_dev ..."
+mkfs.vfat -F 32 /dev/$usb_dev
+echo "USB drive formatted successfully!"
+
