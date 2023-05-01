@@ -163,7 +163,7 @@ build_kernel() {
     fi
 
     msg "Started Compilation"
-    make -j"$PROCS" O=out bindeb-pkg "${MAKE[@]}" 2>&1 | tee Linux-$KERVER-vetea.log
+    make -j"$PROCS" O=out bindeb-pkg "${MAKE[@]}" 2>&1 | tee Linux-$KERVER.log
 
     BUILD_END=$(date +"%s")
     DIFF=$((BUILD_END - BUILD_START))
@@ -207,7 +207,7 @@ uploadtotg() {
         tg_post_msg "headers link: https://pixeldrain.com/u/$FILEID1" "Build took: $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
 	tg_post_msg "image link: https://pixeldrain.com/u/$FILEID2" "Build took: $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
         tg_post_msg "libc link: https://pixeldrain.com/u/$FILEID3" "Build took: $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
-	tg_post_build "Linux-$KERVER-vetea.log" "Build took: $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
+	tg_post_build "Linux-$KERVER.log" "Build took: $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
         cd ..
     fi
 }
