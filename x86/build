@@ -108,7 +108,7 @@ clone() {
 
 exports() {
     if [ $COMPILER = "clang" ]; then
-        KBUILD_COMPILER_STRING=$(clang-16 --version | awk 'NR==1{print $1 " " $2 " " $3}')
+        KBUILD_COMPILER_STRING=$(clang --version | awk 'NR==1{print $1 " " $2 " " $3}')
     elif [ $COMPILER = "gcc" ]; then
         KBUILD_COMPILER_STRING=$("$GCCX86_DIR"/"$MAIN_GCC"/bin/x86_64-pc-linux-gnu-gcc --version | awk 'NR==1{print $1 " " $2 " " $3}')
         PATH=$GCCX86_DIR/$MAIN_GCC/bin/:$PATH
@@ -156,7 +156,7 @@ build_kernel() {
 
     if [ $COMPILER = "clang" ]
     then
-        MAKE+=( CC=clang-16 LLVM=1 LLVM_IAS=1 )
+        MAKE+=( CC=clang LLVM=1 LLVM_IAS=1 )
     elif [ $COMPILER = "gcc" ]
     then
         MAKE+=( CC=gcc )
