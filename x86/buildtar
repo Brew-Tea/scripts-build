@@ -167,7 +167,7 @@ build_kernel() {
     BUILD_END=$(date +"%s")
     DIFF=$((BUILD_END - BUILD_START))
 
-    ls *.deb
+    ls *.tar.zst
 
     if [ "$GETNAME" = 1 ]
     then
