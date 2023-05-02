@@ -70,7 +70,7 @@ KBUILD_BUILD_USER=xealea
 KBUILD_BUILD_HOST=xea@hosting
 
 # Main dir gcc
-MAIN_GCC=x86_64-pc-linux-gnu
+MAIN_GCC=x86_64-linux-gnu
 
 # Debug purpose. Send logs on every successfull builds
 # 1 is YES | 0 is NO(default)
@@ -110,7 +110,7 @@ exports() {
     if [ $COMPILER = "clang" ]; then
         KBUILD_COMPILER_STRING=$(clang --version | awk 'NR==1{print $1 " " $2 " " $3}')
     elif [ $COMPILER = "gcc" ]; then
-        KBUILD_COMPILER_STRING=$("$GCCX86_DIR"/"$MAIN_GCC"/bin/x86_64-pc-linux-gnu-gcc --version | awk 'NR==1{print $1 " " $2 " " $3}')
+        KBUILD_COMPILER_STRING=$("$GCCX86_DIR"/"$MAIN_GCC"/bin/x86_64-linux-gnu-gcc --version | awk 'NR==1{print $1 " " $2 " " $3}')
         PATH=$GCCX86_DIR/$MAIN_GCC/bin/:$PATH
     fi
 
@@ -162,7 +162,7 @@ build_kernel() {
     fi
 
     msg "Started Compilation"
-    make -j"$PROCS" O=out bindeb-pkg "${MAKE[@]}" 2>&1 | tee Linux-$KERVER.log
+    make -j"$PROCS" O=out bindeb-pkg "${MAKE[@]}" 2>&1 | tee Linux-$KERVER-$COMPILER.log
 
     BUILD_END=$(date +"%s")
     DIFF=$((BUILD_END - BUILD_START))
@@ -206,7 +206,7 @@ uploadtotg() {
         tg_post_msg "headers link: https://pixeldrain.com/u/$FILEID1" "Build took: $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
 	tg_post_msg "image link: https://pixeldrain.com/u/$FILEID2" "Build took: $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
         tg_post_msg "libc link: https://pixeldrain.com/u/$FILEID3" "Build took: $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
-	tg_post_build "Linux-$KERVER.log" "Build took: $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
+	tg_post_build "Linux-$KERVER-$COMPILER.log" "Build took: $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
         cd ..
     fi
 }
