@@ -181,6 +181,7 @@ build_kernel() {
     	kernel_wrap1
     	uploadtotg
     else
+        tg_post_build "Linux-$KERVER-$COMPILER.log" "Build took: $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
     	echo "Error: Kernel compilation failed."
     fi
 }
@@ -194,10 +195,6 @@ kernel_wrap1() {
        FILEID2=$(echo "${RESPONSE2}" | grep -Po '(?<="id":")[^"]*')
        RESPONSE3=$(curl -# -F "name=${FILES3}" -F "file=@${FILES3}" -u :"${PD_API_KEY}" https://pixeldrain.com/api/file)
        FILEID3=$(echo "${RESPONSE3}" | grep -Po '(?<="id":")[^"]*')
-       
-       # Get commit log history and add it to the Telegram message
-       COMMIT_LOG=$(git log --pretty=format:'%h - %s (%an)' -n 10)
-       tg_post_msg "<b>Latest commit log:</b>%0A<code>$COMMIT_LOG</code>"
     fi
 }
 
