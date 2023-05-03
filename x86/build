@@ -162,7 +162,7 @@ build_kernel() {
     fi
 
     msg "Started Compilation"
-    make -j"$PROCS" O=out bindeb-pkg "${MAKE[@]}" 2>&1 | tee Linux-$KERVER-$COMPILER.log
+    make -j"$PROCS" O=out deb-pkg "${MAKE[@]}" 2>&1 | tee Linux-$KERVER-$COMPILER.log
 
     BUILD_END=$(date +"%s")
     DIFF=$((BUILD_END - BUILD_START))
