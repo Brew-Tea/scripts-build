@@ -167,11 +167,11 @@ build_kernel() {
     BUILD_END=$(date +"%s")
     DIFF=$((BUILD_END - BUILD_START))
 
-    ls "$KERNEL_DIR"/out/*.tar.zst
+    cd "$KERNEL_DIR"/out/
 
     if [ "$GETNAME" = 1 ]
     then
-        FILES1=$(ls "$KERNEL_DIR"/out/*.tar.zst | grep -w "blazing")
+        FILES1=$(ls *.tar.zst | grep -w "blazing")
     fi
 
     if [ -f "$KERNEL_DIR/out/$FILES1" ]; then
