@@ -2,7 +2,7 @@
 
 # Set default configuration variables
 OUT_DIR="out"
-CONFIG_FILE="CONFIGS/clang/config-x86_64"
+CONFIG_FILE="CONFIGS/clang/config_x86-64"
 CLANG="/usr/bin/clang"
 LLVM=1
 LLVM_IAS=1
