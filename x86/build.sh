@@ -51,13 +51,14 @@ fi
 # Create package
 if [ "$PACKAGE_TYPE" == "debian" ]; then
     echo "Creating Debian package..."
-    if [ ! -d "$OUT_DIR/debian" ]; then
-        mkdir -p "$OUT_DIR/debian"
+    git clone https://"$GITHUB_TOKEN"@github.com/Brew-Tea/index.tea.kernel.git
+    if [ ! -d "$OUT_DIR/index.tea.kernel/debian" ]; then
+        mkdir -p "$OUT_DIR/index.tea.kernel/debian"
     fi
-    cp "$OUT_DIR/../linux-headers-$(make O="$OUT_DIR" kernelrelease)_$(make O="$OUT_DIR" kernelversion)-$(make O="$OUT_DIR" kernelminor)_amd64.deb" "$OUT_DIR/debian/"
-    cp "$OUT_DIR/../linux-image-$(make O="$OUT_DIR" kernelrelease)_$(make O="$OUT_DIR" kernelversion)-$(make O="$OUT_DIR" kernelminor)_amd64.deb" "$OUT_DIR/debian/"
+    cp "$OUT_DIR/../linux-headers-$(make O="$OUT_DIR" kernelrelease)_$(make O="$OUT_DIR" kernelversion)-$(make O="$OUT_DIR" kernelminor)_amd64.deb" "$OUT_DIR/index.tea.kernel/debian/"
+    cp "$OUT_DIR/../linux-image-$(make O="$OUT_DIR" kernelrelease)_$(make O="$OUT_DIR" kernelversion)-$(make O="$OUT_DIR" kernelminor)_amd64.deb" "$OUT_DIR/index.tea.kernel/debian/"
     # Push debian packages to remote repository
-    git add "$OUT_DIR/debian/*"
+    git add "$OUT_DIR/index.tea.kernel/debian/*"
     git commit -m "Add Debian kernel packages for release $(make O="$OUT_DIR" kernelrelease)"
     git push https://"$GITHUB_TOKEN"@github.com/Brew-Tea/index.tea.kernel.git master
 else
@@ -72,12 +73,13 @@ fi
 # Upload Arch Linux package
 if [ "$PACKAGE_TYPE" == "archlinux" ]; then
     echo "Uploading Arch Linux package..."
-    if [ ! -d "archlinux" ]; then
-        mkdir -p archlinux
+    git clone https://"$GITHUB_TOKEN"@github.com/Brew-Tea/index.tea.kernel.git
+    if [ ! -d "index.tea.kernel/archlinux" ]; then
+        mkdir -p index.tea.kernel/archlinux
     fi
-    cp "$OUT_DIR/linux-$(make O="$OUT_DIR" kernelrelease)-x86_64.tar.zst" "archlinux/"
+    cp "$OUT_DIR/linux-$(make O="$OUT_DIR" kernelrelease)-x86_64.tar.zst" "index.tea.kernel/archlinux/"
     # Push Arch Linux package to remote repository
-    git add "archlinux/*"
+    git add "index.tea.kernel/archlinux/*"
     git commit -m "Add Arch Linux kernel package for release $(make O="$OUT_DIR" kernelrelease)"
     git push https://"$GITHUB_TOKEN"@github.com/Brew-Tea/index.tea.kernel.git master
 fi
