@@ -155,10 +155,10 @@ build_kernel() {
 
     if [ $COMPILER = "clang" ]
     then
-        MAKE+=( CC=clang LLVM=1 LLVM_IAS=1 )
+        MAKE+=( CC="ccache clang" LLVM=1 LLVM_IAS=1 )
     elif [ $COMPILER = "gcc" ]
     then
-        MAKE+=( CC=gcc )
+        MAKE+=( CC="ccache gcc" )
     fi
 
     msg "Started Compilation"
